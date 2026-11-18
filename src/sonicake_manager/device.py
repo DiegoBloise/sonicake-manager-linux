@@ -14,6 +14,7 @@ from .decode import (
     is_preset_saved,
 )
 from .protocol import REQUESTS, PacketReassembler, parse_frame
+from . import writes as _writes
 
 
 class DeviceError(RuntimeError):
@@ -69,6 +70,48 @@ class SonicakeDevice:
             if is_preset_saved(payload):
                 return "preset-saved"
         return "timeout"
+
+    def _send_and_wait_ack(self, frame: bytes) -> str:
+        self._transport.send(frame)
+        return self.wait_ack(timeout=2.0, idle_timeout=0.3)
+
+    # -- write commands ----------------------------------------------------------
+    # Edits apply to the device's edit buffer; call ``save_preset`` to persist.
+
+    def set_preset_volume(self, value: int) -> str:
+        return self._send_and_wait_ack(_writes.preset_volume_frame(value))
+
+    def set_bpm(self, value: int) -> str:
+        """Note: the device accepts BPM frames but does not persist the value."""
+        return self._send_and_wait_ack(_writes.preset_bpm_frame(value))
+
+    def set_module_state(self, module: str | int, on: bool) -> str:
+        return self._send_and_wait_ack(_writes.module_state_frame(module, on))
+
+    def set_amp_mode(self, clone: bool) -> str:
+        return self._send_and_wait_ack(_writes.amp_mode_frame(clone))
+
+    def set_effect_type(self, module: str | int, effect_id: int) -> str:
+        return self._send_and_wait_ack(_writes.effect_type_frame(module, effect_id))
+
+    def set_parameter(self, module: str | int, alg_id: int, value) -> str:
+        return self._send_and_wait_ack(_writes.parameter_frame(module, alg_id, value))
+
+    def set_chain(self, chain: list[str]) -> str:
+        return self._send_and_wait_ack(_writes.chain_frame(chain))
+
+    def select_preset(self, number: int, factory: bool = False) -> str:
+        return self._send_and_wait_ack(_writes.preset_select_frame(number, factory))
+
+    def set_footswitch(self, module: str | int, fs2: bool, on: bool) -> str:
+        return self._send_and_wait_ack(_writes.footswitch_frame(module, fs2, on))
+
+    def save_preset(self, name: str, slot: int) -> str:
+        """Persist the current edit buffer into user slot 1..50."""
+        return self._send_and_wait_ack(_writes.save_preset_frame(name, slot))
+
+    def set_global(self, command: str, value) -> str:
+        return self._send_and_wait_ack(_writes.global_command_frame(command, value))
 
     # -- read-only queries ------------------------------------------------------
 
