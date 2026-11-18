@@ -39,12 +39,14 @@ empacotamento e contribuições externas.
 src/sonicake_manager/
   __init__.py          # versão
   protocol/            # tudo que é byte-level: CRC, frames, dumps
-  transport/           # abertura de porta ALSA, timeouts, filas
-  device.py            # API de alto nível (read/write presets, IR, saves)
-  effects.py           # catálogo de módulos/efeitos disponível nos modelos
+  transport/           # ALSA sequencer (ctypes) + FakeTransport
+  decode.py            # decodificadores de dumps (estado, nomes, globais)
+  writes.py            # builders de frames de escrita (tabelas + dinâmico)
+  device.py            # API de alto nível (leitura de dumps, writes com ACK)
+  names.py             # encode/decode de nomes de preset
+  i18n.py              # traduções EN/PT
   cli.py               # ponto de entrada CLI
-  gui.py               # ponto de entrada GUI (Qt)
-  gui/                 # widgets, páginas e estilo
+  gui/                 # aplicativo PySide6 (editor, presets, globais, sobre)
   data/                # tabelas de dados (efeitos, mapeamento de comandos)
 tests/                 # testes unitários e de transporte fake
 docs/                  # documentação pública
