@@ -35,6 +35,7 @@ modules:
       - install -Dm644 packaging/flatpak/io.github.diegobloise.sonicake-manager-linux.desktop /app/share/applications/io.github.diegobloise.sonicake-manager-linux.desktop
       - install -Dm644 packaging/flatpak/io.github.diegobloise.sonicake-manager-linux.metainfo.xml /app/share/metainfo/io.github.diegobloise.sonicake-manager-linux.metainfo.xml
       - install -Dm644 packaging/flatpak/io.github.diegobloise.sonicake-manager-linux.svg /app/share/icons/hicolor/scalable/apps/io.github.diegobloise.sonicake-manager-linux.svg
+      - install -Dm644 LICENSE -t /app/share/licenses/io.github.diegobloise.sonicake-manager-linux/
     sources:
       - type: dir
         path: ../..
