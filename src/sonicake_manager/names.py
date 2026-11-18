@@ -7,6 +7,11 @@ from .data import character_map
 MAX_NAME_LENGTH = 10
 
 
+def encodable_chars() -> set[str]:
+    """Characters the device can store in preset names."""
+    return {ch for ch in character_map().values() if ch}
+
+
 def decode_character_map() -> dict[str, str]:
     return {code: ch for code, ch in character_map().items() if ch}
 
