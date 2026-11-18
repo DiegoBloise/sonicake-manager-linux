@@ -122,6 +122,15 @@ class SonicakeDevice:
         payload = self.request_payload("numero", timeout=2.0, idle_timeout=0.3)
         return payload[2:] if payload[:2] == b"\x12\x43" else payload
 
+    def preset_modified(self) -> bool:
+        """True if the edit buffer has unsaved changes."""
+        payload = self.request_payload("modificado", timeout=2.0, idle_timeout=0.3)
+        if is_preset_modified(payload):
+            return True
+        if is_preset_saved(payload):
+            return False
+        raise DeviceError(f"unexpected preset-modified response: {payload.hex()}")
+
     def preset_names(self) -> list[str]:
         payload = self.request_payload("nomes", timeout=10.0, idle_timeout=0.6)
         if len(payload) < 2002:

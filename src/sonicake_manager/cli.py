@@ -97,6 +97,13 @@ def cmd_info(args) -> int:
     return 0
 
 
+def cmd_modified(args) -> int:
+    with _open(args) as dev:
+        modified = dev.preset_modified()
+    print("modified" if modified else "saved")
+    return 0
+
+
 def cmd_state(args) -> int:
     with _open(args) as dev:
         state = dev.state()
@@ -294,6 +301,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("list", help="list sequencer ports (* = detected Sonicake)").set_defaults(func=cmd_list)
     sub.add_parser("info", help="current preset number").set_defaults(func=cmd_info)
+    sub.add_parser("modified", help="whether the edit buffer has unsaved changes").set_defaults(func=cmd_modified)
     sub.add_parser("state", help="decoded current-preset state (JSON)").set_defaults(func=cmd_state)
     sub.add_parser("names", help="list the 100 preset names").set_defaults(func=cmd_names)
     sub.add_parser("globals", help="decoded global settings (JSON)").set_defaults(func=cmd_globals)
