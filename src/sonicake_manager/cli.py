@@ -182,7 +182,7 @@ def cmd_import_preset(args) -> int:
             print(f"ok: {line}")
         for line in report["skipped"]:
             print(f"skip: {line}")
-        if any(line.rstrip(")").endswith(("nack", "timeout", "preset-modified")) for line in report["applied"]):
+        if any(line.rstrip(")").endswith(("nack", "timeout")) for line in report["applied"]):
             print("warning: at least one device write was not ACKed")
             return 1
         if args.save_slot is not None:
@@ -193,7 +193,7 @@ def cmd_import_preset(args) -> int:
                 return 2
             ack = dev.save_preset(name, args.save_slot)
             print(f"save '{name}' to slot {args.save_slot}: {ack}")
-            return 0 if ack == "ack" else 1
+            return 0 if _save_ok(ack) else 1
     return 0
 
 
@@ -224,28 +224,28 @@ def cmd_select(args) -> int:
     with _open(args) as dev:
         ack = dev.select_preset(number, factory=factory)
     print(f"select {args.name.upper()}: {ack}")
-    return 0 if ack == "ack" else 1
+    return 0 if _select_ok(ack) else 1
 
 
 def cmd_set_module(args) -> int:
     with _open(args) as dev:
         ack = dev.set_module_state(args.module, args.state.lower() in ("on", "1", "true"))
     print(f"module {args.module} {args.state}: {ack}")
-    return 0 if ack == "ack" else 1
+    return 0 if _edit_ok(ack) else 1
 
 
 def cmd_set(args) -> int:
     with _open(args) as dev:
         ack = dev.set_parameter(args.module, int(args.alg_id), float(args.value))
     print(f"parameter {args.module} algId {args.alg_id} = {args.value}: {ack}")
-    return 0 if ack == "ack" else 1
+    return 0 if _edit_ok(ack) else 1
 
 
 def cmd_effect(args) -> int:
     with _open(args) as dev:
         ack = dev.set_effect_type(args.module, int(args.effect_id))
     print(f"effect {args.module} -> {args.effect_id}: {ack}")
-    return 0 if ack == "ack" else 1
+    return 0 if _edit_ok(ack) else 1
 
 
 def cmd_chain(args) -> int:
@@ -253,28 +253,28 @@ def cmd_chain(args) -> int:
     with _open(args) as dev:
         ack = dev.set_chain(chain)
     print(f"chain {'-'.join(chain)}: {ack}")
-    return 0 if ack == "ack" else 1
+    return 0 if _edit_ok(ack) else 1
 
 
 def cmd_volume(args) -> int:
     with _open(args) as dev:
         ack = dev.set_preset_volume(args.value)
     print(f"preset volume {args.value}: {ack}")
-    return 0 if ack == "ack" else 1
+    return 0 if _edit_ok(ack) else 1
 
 
 def cmd_amp_mode(args) -> int:
     with _open(args) as dev:
         ack = dev.set_amp_mode(args.mode == "clone")
     print(f"amp mode {args.mode}: {ack}")
-    return 0 if ack == "ack" else 1
+    return 0 if _edit_ok(ack) else 1
 
 
 def cmd_save(args) -> int:
     with _open(args) as dev:
         ack = dev.save_preset(args.name, args.slot)
     print(f"save '{args.name}' to slot {args.slot}: {ack}")
-    return 0 if ack == "ack" else 1
+    return 0 if _save_ok(ack) else 1
 
 
 def cmd_set_global(args) -> int:
@@ -287,8 +287,29 @@ def cmd_set_global(args) -> int:
     with _open(args) as dev:
         ack = dev.set_global(args.command, value)
     print(f"global {args.command} = {value}: {ack}")
-    return 0 if ack == "ack" else 1
+    return 0 if _edit_ok(ack) else 1
 
+
+
+_EDIT_WRITE_OK = {"ack", "preset-modified"}
+_SAVE_WRITE_OK = {"ack", "preset-saved"}
+_SELECT_OK = {"ack", "preset-saved", "preset-modified"}
+
+
+def _edit_ok(status: str) -> bool:
+    # Hardware returns the preset-modified notification as the positive
+    # response to edit-buffer writes; both mean the device accepted the frame.
+    return status in _EDIT_WRITE_OK
+
+
+def _save_ok(status: str) -> bool:
+    return status in _SAVE_WRITE_OK
+
+
+def _select_ok(status: str) -> bool:
+    # Selecting a preset reloads the saved buffer; hardware answers with the
+    # preset-saved notification rather than a plain ACK.
+    return status in _SELECT_OK
 
 # -- entry point ---------------------------------------------------------------
 

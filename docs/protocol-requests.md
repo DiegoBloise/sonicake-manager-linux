@@ -28,4 +28,19 @@ Os frames estão embalados em `sonicake_manager.protocol.requests.REQUESTS`.
 As respostas não ecoam o request. O roteamento é feito por contexto:
 
 - estado/nomes/número/globais → dump remontável por `total`/`seq`;
-- modificado → notificação `0102 0405 000N` (N=1 modificado, N=0 salvo).
+- modificado → notificação `12 45 01` (buffer modificado) ou `12 45 00` (buffer salvo);
+- ACK de escrita → `14 08 00` (ACK), `14 08 01` (NACK).
+
+### Respostas observadas de comandos de escrita
+
+Medido contra o hardware (Pocket Master, novembro/2026):
+
+| Comando | Resposta observada |
+|---|---|
+| Escrita no edit buffer (parâmetro) | `12 45 01` ("preset-modified") ou `14 08 00` (ACK) — ambos indicam sucesso |
+| Seleção de preset | `12 45 00` ("preset-saved"), `12 45 01` ou `14 08 00` — todos indicam sucesso |
+| Save para slot de usuário | Não validado em hardware ainda |
+
+A flag "modificado" é pegajosa (sticky): uma vez suja, ela só é limpa
+recarregando o preset (select) ou salvando. Restaurar os valores anteriores
+não limpa a flag.

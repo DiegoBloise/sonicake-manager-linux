@@ -65,7 +65,7 @@ def build_backup(
         if progress:
             progress(position, len(slots), slot_label(index) or str(index))
         ack = device.select_preset(number, factory=factory)
-        if ack != "ack":
+        if ack not in ("ack", "preset-saved", "preset-modified"):
             raise BackupError(f"selecting {slot_label(index)} returned {ack}")
         state = device.state()
         name = names[index] if 0 <= index < len(names) else None
