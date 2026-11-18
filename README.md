@@ -15,6 +15,7 @@ The goal is a fully native Linux experience for editing Sonicake processors: a P
 - Edit the edit buffer: module on/off, effect selection, parameters, chain order, preset volume, amp mode, footswitch assignment
 - Save the buffer to any of the 50 user slots
 - Export the current edit buffer to JSON and replay it into the buffer (`export` / `import-preset --yes`)
+- Whole-bank backup export (backup-only): `backup-all backup.json --bank all --yes`
 - PySide6 GUI (current-preset editor, preset browser, global settings) with English and Portuguese translations
 - CLI (`sonicake-manager`) for scripting and debugging
 - Packaged effect/parameter data tables; CRC-verified frames
@@ -22,7 +23,7 @@ The goal is a fully native Linux experience for editing Sonicake processors: a P
 ## Not yet implemented
 
 - IR upload and clone profile (NAM) management
-- Full backup/restore of all 100 presets (current-preset JSON export/import is implemented)
+- Restore-all from a full backup (backup-only export exists; factory writes are not supported)
 - BLE-MIDI transport (UI is prepared for it; ALSA sequencer only today)
 - Factory preset writing (read/select only)
 

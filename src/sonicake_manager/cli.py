@@ -21,6 +21,7 @@ import json
 import sys
 from pathlib import Path
 
+from .backup import BackupError, build_backup, dumps_backup
 from .device import SonicakeDevice, DeviceError
 from .preset_file import apply_export, build_export, dumps_export, loads_export, preset_index_from_raw
 from .transport import AlsaSequencerTransport, TransportError, find_devices, list_devices
@@ -190,6 +191,26 @@ def cmd_import_preset(args) -> int:
 
 
 
+def cmd_backup_all(args) -> int:
+    if not args.yes:
+        _eprint("refusing to iterate every preset without --yes (the device will change presets)")
+        return 2
+
+    def progress(position: int, total: int, label: str) -> None:
+        if position == 1 or position == total or position % 10 == 0:
+            print(f"[{position}/{total}] {label}")
+
+    with _open(args) as dev:
+        try:
+            data = build_backup(dev, bank=args.bank, progress=progress)
+        except BackupError as exc:
+            _eprint(f"error: {exc}")
+            return 2
+    Path(args.output).write_text(dumps_backup(data), encoding="utf-8")
+    print(f"backup written to {args.output} ({len(data['slots'])} presets)")
+    return 0
+
+
 def cmd_select(args) -> int:
     factory = args.name.upper().startswith("F")
     number = int(args.name[1:])
@@ -290,6 +311,12 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--save-slot", type=int, help="after importing, save the buffer to user slot 1..50")
     p.add_argument("--name", help="name for --save-slot (default: name from the export)")
     p.set_defaults(func=cmd_import_preset)
+
+    p = sub.add_parser("backup-all", help="back up user/factory presets to one JSON file (requires --yes)")
+    p.add_argument("output", help="output JSON file")
+    p.add_argument("--bank", choices=["user", "factory", "all"], default="all")
+    p.add_argument("--yes", action="store_true", help="confirm that the device will cycle through presets")
+    p.set_defaults(func=cmd_backup_all)
 
     p = sub.add_parser("select", help="select a preset, e.g. P03 or F12")
     p.add_argument("name", help="preset slot, e.g. P03 (user) or F12 (factory)")

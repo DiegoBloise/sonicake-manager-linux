@@ -34,6 +34,9 @@ It deliberately does **not**:
 
 Always inspect the export with a JSON viewer before importing. `--yes` is required because every write goes straight to the device's live edit buffer.
 
-## Full backup/restore
+## Full backup
 
-A complete 100-slot backup is not implemented yet. It requires repeatedly selecting each preset (or another reliable dump path) and would create many device writes; it should be designed and validated separately.
+`sonicake-manager backup-all backup.json --bank all --yes` selects every preset once, reads each edit-buffer state, and stores all slots in one JSON document. It restores the originally selected preset afterwards.
+
+This is still **backup-only**. A restore-all operation would overwrite every user preset and needs dedicated validation and confirmation flow before it should exist.
+
