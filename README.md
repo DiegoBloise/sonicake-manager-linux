@@ -86,7 +86,7 @@ sonicake-manager save 1 --name TONE   # save edit buffer to user slot 1
 A Flatpak manifest lives in [`packaging/flatpak/`](packaging/flatpak/) and uses the `io.qt.PySide.BaseApp` base (Qt 6.11 / KDE Platform), so build times stay small and no PySide6 sources are compiled. Build locally with:
 
 ```bash
-flatpak-builder --user --install --force-clean build-dir packaging/flatpak/io.github.DiegoBloise.sonicake_manager_linux.yml
+flatpak-builder --user --install --force-clean build-dir packaging/flatpak/io.github.diegobloise.sonicake_manager_linux.yml
 ```
 
 USB-MIDI needs `/dev/snd/seq`; Flatpak has no dedicated sound-only device permission, so the manifest uses `--device=all`. The app does not request host filesystem access. This is experimental; expect to iterate on finish-args. Other formats (AppImage, RPM, DEB) are planned.
