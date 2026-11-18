@@ -16,7 +16,7 @@ The goal is a fully native Linux experience for editing Sonicake processors: a P
 - Save the buffer to any of the 50 user slots
 - Export the current edit buffer to JSON and replay it into the buffer (`export` / `import-preset --yes`)
 - Whole-bank backup export (backup-only): `backup-all backup.json --bank all --yes`
-- PySide6 GUI (current-preset editor, preset browser, global settings) with English and Portuguese translations
+- PySide6 GUI (current-preset editor, preset browser, IR/clone slot listing, global settings, unsaved-changes indicator) with English and Portuguese translations
 - CLI (`sonicake-manager`) for scripting and debugging
 - Packaged effect/parameter data tables; CRC-verified frames
 
@@ -24,7 +24,7 @@ The goal is a fully native Linux experience for editing Sonicake processors: a P
 
 - IR upload and clone profile (NAM) management
 - Restore-all from a full backup (backup-only export exists; factory writes are not supported)
-- BLE-MIDI transport (UI is prepared for it; ALSA sequencer only today)
+- BLE-MIDI transport
 - Factory preset writing (read/select only)
 
 Contributions welcome — see [docs/architecture.md](docs/architecture.md).
@@ -55,11 +55,17 @@ CLI quick reference:
 ```bash
 sonicake-manager list                 # list sequencer ports (* = device)
 sonicake-manager info                 # current preset slot
+sonicake-manager modified             # unsaved changes in the edit buffer?
 sonicake-manager state                # full state dump, decoded (JSON)
 sonicake-manager names                # list the 100 preset names
+sonicake-manager ir-names             # list the 5 user IR slot names
+sonicake-manager clone-names          # list the 5 user clone profile slot names
 sonicake-manager select P03           # select user preset 3
 sonicake-manager set DRV 0 40         # parameter: module, algId, value
 sonicake-manager set-module DRV on    # toggle a module
+sonicake-manager export preset.json   # export the edit buffer to JSON
+sonicake-manager import-preset preset.json --yes   # replay it into the buffer
+sonicake-manager backup-all backup.json --bank all --yes  # back up all slots
 sonicake-manager save 1 --name TONE   # save edit buffer to user slot 1
 ```
 
