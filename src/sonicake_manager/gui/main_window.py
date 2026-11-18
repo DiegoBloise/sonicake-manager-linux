@@ -3,14 +3,16 @@
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 
 from PySide6.QtCore import QSettings, QTimer
 from PySide6.QtGui import QAction
-from PySide6.QtWidgets import QApplication, QComboBox, QMainWindow, QMessageBox, QStatusBar, QTabWidget, QToolBar
+from PySide6.QtWidgets import QApplication, QComboBox, QFileDialog, QMainWindow, QMessageBox, QStatusBar, QTabWidget, QToolBar
 
 from .. import __version__
 from ..device import SonicakeDevice, DeviceError
 from ..i18n import set_language, t
+from ..preset_file import build_export, dumps_export, preset_index_from_raw
 from ..transport import AlsaSequencerTransport, TransportError, find_devices, list_devices
 from .about_tab import AboutTab
 from .common import preset_label
@@ -38,9 +40,13 @@ class MainWindow(QMainWindow):
         self.refresh_ports_action.triggered.connect(self._on_refresh_ports)
         self.connect_action = QAction(t("action_connect"), self)
         self.connect_action.triggered.connect(self._on_toggle_connect)
+        self.export_action = QAction(t("action_export"), self)
+        self.export_action.setEnabled(False)
+        self.export_action.triggered.connect(self._on_export_preset)
         toolbar.addWidget(self.port_combo)
         toolbar.addAction(self.refresh_ports_action)
         toolbar.addAction(self.connect_action)
+        toolbar.addAction(self.export_action)
         self.addToolBar(toolbar)
 
         quit_action = QAction("Quit", self)
@@ -144,6 +150,7 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, t("app_title"), t("err_device", message=str(exc)))
             return
         self.connect_action.setText(t("action_disconnect"))
+        self.export_action.setEnabled(True)
         self.editor.setEnabled(True)
         self.presets.setEnabled(True)
         self.globals_tab.setEnabled(True)
@@ -154,6 +161,7 @@ class MainWindow(QMainWindow):
                 self.dev.close()
         finally:
             self.dev = None
+            self.export_action.setEnabled(False)
             self.editor.setEnabled(False)
             self.presets.setEnabled(False)
             self.globals_tab.setEnabled(False)
@@ -196,6 +204,27 @@ class MainWindow(QMainWindow):
         with self._busy(t("status_reading")):
             glob = dev.globals()
         self.globals_tab.load_globals(glob)
+
+    def _on_export_preset(self) -> None:
+        dev = self._require_device()
+        if dev is None:
+            return
+        with self._busy(t("status_reading")):
+            state = dev.state()
+            index = preset_index_from_raw(dev.preset_number_raw())
+            try:
+                names = dev.preset_names()
+            except DeviceError:
+                names = []
+        name = names[index] if index is not None and 0 <= index < len(names) else None
+        data = build_export(state, slot_index=index, name=name)
+        slot = (data.get("slot") or {}).get("label") or "preset"
+        filename = f"sonicake-{slot.lower()}.json"
+        path, _selected = QFileDialog.getSaveFileName(self, t("action_export"), filename, "JSON (*.json)")
+        if not path:
+            return
+        Path(path).write_text(dumps_export(data), encoding="utf-8")
+        self._set_status(t("status_export_saved", path=path))
 
     # -- editor writes ----------------------------------------------------------
 
