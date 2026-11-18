@@ -83,13 +83,18 @@ sonicake-manager save 1 --name TONE   # save edit buffer to user slot 1
 
 ## Flatpak
 
-A Flatpak manifest lives in [`packaging/flatpak/`](packaging/flatpak/) and uses the `io.qt.PySide.BaseApp` base (Qt 6.11 / KDE Platform), so build times stay small and no PySide6 sources are compiled. Build locally with:
+A Flatpak manifest lives in [`packaging/flatpak/`](packaging/flatpak/) and uses the `io.qt.PySide.BaseApp` base (Qt 6.11 / KDE Platform), so build times stay small and no PySide6 sources are compiled. Build and install locally with:
 
 ```bash
+# flatpak-builder, if installed on the host:
 flatpak-builder --user --install --force-clean build-dir packaging/flatpak/io.github.diegobloise.sonicake_manager_linux.yml
+
+# or, on hosts without flatpak-builder (e.g. immutable systems):
+flatpak --user install flathub org.kde.Sdk//6.11 io.qt.PySide.BaseApp//6.11 org.flatpak.Builder//stable
+flatpak run org.flatpak.Builder --user --install --force-clean build-dir packaging/flatpak/io.github.diegobloise.sonicake_manager_linux.yml
 ```
 
-USB-MIDI needs `/dev/snd/seq`; Flatpak has no dedicated sound-only device permission, so the manifest uses `--device=all`. The app does not request host filesystem access. This is experimental; expect to iterate on finish-args. Other formats (AppImage, RPM, DEB) are planned.
+USB-MIDI needs `/dev/snd/seq`; Flatpak has no dedicated sound-only device permission, so the manifest uses `--device=all`. The app does not request host filesystem access. The manifest has been built and smoke-tested locally (CLI runs; GUI imports with `QT_QPA_PLATFORM=offscreen`); it has not yet been submitted to Flathub. Other formats (AppImage, RPM, DEB) are planned.
 
 ## Protocol and data tables
 
