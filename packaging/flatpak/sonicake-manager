@@ -1,0 +1,5 @@
+#!/bin/sh
+# Wrapper: the Flatpak BaseApp provides python3 and PySide6.
+PYTHONPATH="/app/lib/sonicake-manager${PYTHONPATH:+:$PYTHONPATH}"
+export PYTHONPATH
+exec python3 -m sonicake_manager.cli "$@"

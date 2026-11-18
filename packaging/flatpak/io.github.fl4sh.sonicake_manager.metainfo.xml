@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.fl4sh.sonicake_manager</id>
+  <launchable type="desktop-id">io.github.fl4sh.sonicake_manager.desktop</launchable>
+  <name>Sonicake Manager</name>
+  <summary>Manage Sonicake guitar processors on Linux</summary>
+  <developer id="io.github.fl4sh.sonicake_manager">
+    <name>Sonicake Manager for Linux contributors</name>
+  </developer>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <url type="homepage">https://github.com/fl4sh/sonicake-manager-linux</url>
+  <url type="bugtracker">https://github.com/fl4sh/sonicake-manager-linux/issues</url>
+  <description>
+    <p>
+      Sonicake Manager for Linux is an open-source desktop manager for
+      Sonicake guitar processors. It talks to the hardware over USB-MIDI
+      using a documented implementation of the device's published SysEx
+      payload format.
+    </p>
+    <p>
+      Features include browsing and selecting the 100 preset slots, editing
+      the current preset (module on/off, effect selection, parameters, chain
+      order, preset volume, amp mode), saving the edit buffer to user slots,
+      and editing supported global settings.
+    </p>
+    <p>
+      This project is independent and is not affiliated with Sonicake.
+    </p>
+  </description>
+  <categories>
+    <category>AudioVideo</category>
+    <category>Audio</category>
+    <category>MIDI</category>
+  </categories>
+  <content_rating type="oars-1.1" />
+  <releases>
+    <release version="0.1.0" date="2026-11-18">
+      <description>
+        <p>Initial release: current-preset editor, preset browser, global settings, CLI.</p>
+      </description>
+    </release>
+  </releases>
+</component>

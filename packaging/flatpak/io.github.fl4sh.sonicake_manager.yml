@@ -1,0 +1,39 @@
+id: io.github.fl4sh.sonicake_manager
+runtime: org.kde.Platform
+runtime-version: '6.11'
+sdk: org.kde.Sdk
+base: io.qt.PySide.BaseApp
+base-version: '6.11'
+command: sonicake-manager-gui
+
+build-options:
+  env:
+    - BASEAPP_REMOVE_WEBENGINE=1
+    - BASEAPP_DISABLE_NUMPY=1
+
+finish-args:
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  # ALSA sequencer needs access to /dev/snd/seq. Flatpak has no dedicated
+  # sound-only device permission, so USB-MIDI requires --device=all.
+  - --device=all
+
+modules:
+  - name: sonicake-manager
+    buildsystem: simple
+    build-commands:
+      - install -d /app/lib/sonicake-manager
+      - cp -a src/sonicake_manager /app/lib/sonicake-manager/
+      - find /app/lib/sonicake-manager -type d -name __pycache__ -exec rm -rf {} +
+      - find /app/lib/sonicake-manager -type f -name '*.pyc' -delete
+      - install -Dm755 packaging/flatpak/sonicake-manager /app/bin/sonicake-manager
+      - install -Dm755 packaging/flatpak/sonicake-manager-gui /app/bin/sonicake-manager-gui
+      - install -Dm644 packaging/flatpak/io.github.fl4sh.sonicake_manager.desktop /app/share/applications/io.github.fl4sh.sonicake_manager.desktop
+      - install -Dm644 packaging/flatpak/io.github.fl4sh.sonicake_manager.metainfo.xml /app/share/metainfo/io.github.fl4sh.sonicake_manager.metainfo.xml
+      - install -Dm644 packaging/flatpak/io.github.fl4sh.sonicake_manager.svg /app/share/icons/hicolor/scalable/apps/io.github.fl4sh.sonicake_manager.svg
+    cleanup-commands:
+      - /app/cleanup-BaseApp.sh
+    sources:
+      - type: dir
+        path: ../..
