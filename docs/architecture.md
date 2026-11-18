@@ -44,10 +44,11 @@ src/sonicake_manager/
   writes.py            # builders de frames de escrita (tabelas + dinâmico)
   device.py            # API de alto nível (leitura de dumps, writes com ACK)
   preset_file.py       # export/import JSON do buffer atual
+  backup.py            # backup exportável de todo o banco (backup-only)
   names.py             # encode/decode de nomes de preset
   i18n.py              # traduções EN/PT
   cli.py               # ponto de entrada CLI
-  gui/                 # aplicativo PySide6 (editor, presets, globais, sobre)
+  gui/                 # aplicativo PySide6 (editor, presets, IR/clone, globais)
   data/                # tabelas de dados (efeitos, mapeamento de comandos)
 tests/                 # testes unitários e de transporte fake
 docs/                  # documentação pública
