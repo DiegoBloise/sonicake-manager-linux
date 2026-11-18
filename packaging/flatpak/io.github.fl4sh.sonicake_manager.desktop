@@ -5,6 +5,6 @@ Comment=Desktop manager for Sonicake guitar processors over USB-MIDI
 Exec=sonicake-manager-gui
 Icon=io.github.fl4sh.sonicake_manager
 Terminal=false
-Categories=AudioVideo;Audio;MIDI;
+Categories=AudioVideo;Audio;Midi;
 Keywords=guitar;pedal;midi;sonicake;amp;effects;
 StartupNotify=true
