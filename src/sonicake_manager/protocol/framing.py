@@ -2,10 +2,16 @@
 
 Wire format:
 
-    8080 F0 <CRC> <total> <seq> <len> <payload> F7
+    8080 F0 <crc> <total> <seq> <len> <payload> F7
 
-Every logical byte is transmitted as two nibble-expanded bytes (hi, lo).
-The CRC is CRC-8/SMBUS over the logical bytes.
+Where each logical byte (including CRC/total/seq/len) is transmitted as two
+nibble-expanded bytes (hi, lo) and the payload is the nibble-expansion of its
+logical bytes.
+
+The CRC is CRC-8/SMBUS over the "seed" bytes plus the logical payload:
+
+    seed = [0x01, 0x00, len]      (single packet / commands)
+    seed = [total, seq, len]      (multi-packet uploads, total != 1)
 """
 
 from __future__ import annotations
@@ -19,11 +25,11 @@ SYSEX_END = 0xF7
 MAX_PAYLOAD = 0xFF
 
 
-def crc8_smbus(data: bytes) -> int:
+def crc8_smbus(data: bytes | list[int]) -> int:
     """CRC-8/SMBUS (poly 0x07, init 0x00, no reflection, no xor-out)."""
     crc = 0x00
     for byte in data:
-        crc ^= byte
+        crc ^= byte & 0xFF
         for _ in range(8):
             if crc & 0x80:
                 crc = ((crc << 1) ^ 0x07) & 0xFF
@@ -33,7 +39,6 @@ def crc8_smbus(data: bytes) -> int:
 
 
 def expand_nibble(byte: int) -> bytes:
-    """Expand one logical byte into two nibble-expanded bytes."""
     if not 0 <= byte <= 0xFF:
         raise ValueError(f"byte out of range: {byte!r}")
     return bytes([(byte >> 4) & 0x0F, byte & 0x0F])
@@ -55,40 +60,34 @@ def nibble_collapse(data: bytes) -> bytes:
     return bytes(collapse_nibble(data[i], data[i + 1]) for i in range(0, len(data), 2))
 
 
-def encode_request(command2: bytes) -> bytes:
-    """Encode a read request frame (len=2, raw payload, BLE header)."""
-    if len(command2) != 2:
-        raise ValueError("request payload must be exactly 2 bytes")
-    body = bytes([0x01, 0x00, len(command2)]) + command2
-    crc = crc8_smbus(body)
-    frame = bytearray()
-    frame += struct.pack(">H", BLE_HEADER)
-    frame += bytes([SYSEX_START])
-    frame += expand_nibble(crc)
-    frame += expand_nibble(0x01)  # total = 1
-    frame += expand_nibble(0x00)  # seq = 0
-    frame += expand_nibble(len(command2))
-    frame += command2
-    frame += bytes([SYSEX_END])
-    return bytes(frame)
-
-
-def encode_write(payload: bytes) -> bytes:
-    """Encode a write frame with nibble-expanded payload, BLE header, CRC-8."""
+def build_frame(payload: bytes, *, total: int = 1, seq: int = 0) -> bytes:
+    """Build a full frame. CRC is over [tt, ss, len] + payload."""
     if len(payload) > MAX_PAYLOAD:
         raise ValueError("payload too large")
-    body = bytes([0x01, 0x00, len(payload)]) + payload
+    tt, ss = (0x01, 0x00) if total == 1 else (total, seq)
+    body = bytes([tt, ss, len(payload)]) + payload
     crc = crc8_smbus(body)
+
     frame = bytearray()
     frame += struct.pack(">H", BLE_HEADER)
     frame += bytes([SYSEX_START])
     frame += expand_nibble(crc)
-    frame += expand_nibble(0x01)  # total = 1
-    frame += expand_nibble(0x00)  # seq = 0
+    frame += expand_nibble(total)
+    frame += expand_nibble(seq)
     frame += expand_nibble(len(payload))
     frame += nibble_expand(payload)
     frame += bytes([SYSEX_END])
     return bytes(frame)
+
+
+def build_chunked_frames(blob: bytes, chunk_size: int = 19) -> list[bytes]:
+    """Split a blob into ACK-able multi-packet frames (IR/clone upload)."""
+    total = (len(blob) + chunk_size - 1) // chunk_size
+    frames = []
+    for seq in range(total):
+        chunk = blob[seq * chunk_size : (seq + 1) * chunk_size]
+        frames.append(build_frame(chunk, total=total, seq=seq))
+    return frames
 
 
 class Frame:
@@ -101,19 +100,21 @@ class Frame:
         self.payload = payload
 
     def __repr__(self) -> str:  # pragma: no cover - debugging helper
-        return f"Frame(total={self.total}, seq={self.seq}, len={self.len}, payload={self.payload.hex()})"
+        return (
+            f"Frame(total={self.total}, seq={self.seq}, "
+            f"len={self.len}, payload={self.payload.hex()})"
+        )
 
 
 def parse_frame(data: bytes) -> Frame:
-    """Parse an inbound frame. Raises ValueError on malformed data."""
+    """Parse a full frame. Raises ValueError on malformed data."""
     if not data.startswith(b"\x80\x80\xF0"):
-        raise ValueError("missing BLE header or F0")
+        raise ValueError("missing 8080 F0 header")
     if not data.endswith(b"\xF7"):
         raise ValueError("missing F7 terminator")
-
-    body = data[3:-1]  # strip 8080 F0 ... F7
-    if len(body) < 6:
-        raise ValueError("frame too short")
+    body = data[3:-1]
+    if len(body) < 8 or len(body) % 2 != 0:
+        raise ValueError("frame too short or odd-length body")
 
     crc = collapse_nibble(body[0], body[1])
     total = collapse_nibble(body[2], body[3])
@@ -128,7 +129,8 @@ def parse_frame(data: bytes) -> Frame:
         )
 
     payload = nibble_collapse(expanded)
-    if crc8_smbus(bytes([total, seq, len_field]) + payload) != crc:
+    tt, ss = (0x01, 0x00) if total == 1 else (total, seq)
+    if crc8_smbus(bytes([tt, ss, len_field]) + payload) != crc:
         raise ValueError("CRC mismatch")
 
     return Frame(total=total, seq=seq, len_field=len_field, payload=payload)
@@ -146,15 +148,11 @@ class PacketReassembler:
             self._total = frame.total
         elif frame.total != self._total:
             raise ValueError(f"inconsistent total: expected {self._total}, got {frame.total}")
-
         self._packets[frame.seq] = frame.payload
-
         if len(self._packets) == self._total:
-            ordered = [self._packets[i] for i in range(self._total)]
-            payload = b"".join(ordered)
+            payload = b"".join(self._packets[i] for i in range(self._total))
             self.reset()
             return payload
-
         return None
 
     def reset(self) -> None:

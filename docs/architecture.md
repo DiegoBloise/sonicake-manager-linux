@@ -13,7 +13,7 @@ empacotamento e contribuições externas.
 │   framing, CRC, nibble expansion, ACK/NACK      │
 ├─────────────────────────────────────────────────┤
 │ Transport — sonicake_manager.transport          │
-│   ALSA sequencer via mido/rtmidi                │
+│   ALSA sequencer via ctypes/libasound           │
 └─────────────────────────────────────────────────┘
 ```
 
@@ -53,9 +53,10 @@ docs/                  # documentação pública
 ## Compatibilidade alvo
 
 - **Runtime:** Python ≥ 3.11, qualquer glibc/Linux padrão (Fedora atomic,
-  Debian, Ubuntu/derivatives, Arch).
-- **Áudio/MIDI:** ALSA obrigatório; funciona sob PipeWire/PipeWire-JACK
+  Debian, Ubuntu/derivatives, Arch). Sem dependências compiladas: o
+  transporte ALSA usa `ctypes` sobre `libasound.so.2` (sempre presente).
+- **Áudio/MIDI:** ALSA obrigatório (sequenciador); funciona sob PipeWire
   e sobre ALSA direto.
 - **GUI:** Qt (PySide6) — mesma renderização em X11 e Wayland.
-- **Empacotamento:** Flatpak (flatpak-builder com PyPyRuntime/org.python),
-  AppImage, e RPMs/deb simples via `flatpak-builder` manifesto futuro.
+- **Empacotamento:** Flatpak (flathub), AppImage e RPM/deb futuramente.
+  O manifesto Flatpak declara `org.freedesktop.Sdk//23.08` com PySide6.

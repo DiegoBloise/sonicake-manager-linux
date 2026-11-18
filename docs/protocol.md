@@ -8,24 +8,18 @@ Sonicake. É a referência de design do `sonicake_manager.protocol`.
 - Transporte: **USB-MIDI** classe-compliant ou **BLE-MIDI**.
 - Sem SDKs de terceiros: tudo é **SysEx**.
 - Frame: `8080 F0 <CRC> <total> <seq> <len> <payload> F7`.
-- Cada byte lógico é transmitido com nibble-expansion: `0xAB` → `0A 0B`.
+- **Todo** byte lógico — inclusive CRC/total/seq/len — é transmitido com
+  nibble-expansion: `0xAB` → `0A 0B`.
 - CRC: **CRC-8/SMBUS** (poly `0x07`, init `0x00`), calculado sobre
-  `[total, seq, len] + payload` para uploads em bloco, ou
-  `[01, 00, len] + payload` para comandos simples.
+  `[01, 00, len] + payload` para pacotes únicos, ou `[total, seq, len] +
+  payload` para pacotes de um upload em bloco.
 
 ## Leitura vs. escrita
 
 ### Requests (leem do pedal)
 
-Frames curtos com payload "cru" (sem nibble-expansion), `len = 2`:
-
-```
-8080 F0 <CRC> 00 01 00 00 00 02 01 02 <cmd> F7
-```
-
-Comandos documentados em `docs/protocol-requests.md`: estado atual, nomes de
-presets, preset number, configurações globais, nomes de IR, nomes de clone,
-notificação de modificação, init de sessão.
+Frames validados contra o dispositivo — use os bytes documentados em
+`docs/protocol-requests.md` exatamente como estão:
 
 ### Writes (escrevem no pedal)
 
@@ -52,8 +46,13 @@ Frames com payload nibble-expanded, a partir de `11 4x`:
 ## Remontagem de pacotes
 
 Respostas grandes são divididas em vários pacotes com `total` constante e
-`seq` crescente. Concatenar os payloads ordenados por `seq`. A resposta não
-ecoia o request — roteamento por contexto.
+`seq` crescente. Concatene os payloads ordenados por `seq`. A resposta não
+ecoia o request — o roteamento é por contexto.
+
+## Uploads em bloco
+
+IR e perfis de clone são enviados com `build_chunked_frames()` (chunks de 19
+bytes, CRC por pacote sobre `[total, seq, len] + chunk`), com ACK por pacote.
 
 ## Observações de implementação
 

@@ -53,5 +53,6 @@ Payload: `11 4D 01 20 <fsId> <mask>` — `fsId=01` (FS1) ou `02` (FS2),
 - `11 11` — volume global.
 - `11 4B` — outras configurações globais (backlight, ECO, reamp).
 
-O frame completo é `8080 F0 <CRC> 0001 0000 <len> <payload expanded> F7`.
-Veja `sonicake_manager.protocol.frame` para encode/decode.
+O frame completo é montado por `sonicake_manager.protocol.build_frame()`:
+`8080 F0 <crc expandido> 00 01 00 00 <len expandido> <payload expandido> F7`.
+Consulte `sonicake_manager.protocol.framing` para encode/parse.

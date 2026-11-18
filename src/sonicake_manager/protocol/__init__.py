@@ -3,25 +3,28 @@
 from .framing import (
     Frame,
     PacketReassembler,
+    build_chunked_frames,
+    build_frame,
     collapse_nibble,
     crc8_smbus,
-    encode_request,
-    encode_write,
     expand_nibble,
     nibble_collapse,
     nibble_expand,
     parse_frame,
 )
+from .requests import REQUESTS, request_bytes
 
 __all__ = [
     "Frame",
     "PacketReassembler",
+    "REQUESTS",
+    "build_chunked_frames",
+    "build_frame",
     "collapse_nibble",
     "crc8_smbus",
-    "encode_request",
-    "encode_write",
     "expand_nibble",
     "nibble_collapse",
     "nibble_expand",
     "parse_frame",
+    "request_bytes",
 ]
