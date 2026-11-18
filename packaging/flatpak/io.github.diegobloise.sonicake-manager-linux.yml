@@ -1,4 +1,4 @@
-id: io.github.diegobloise.sonicake_manager_linux
+id: io.github.diegobloise.sonicake-manager-linux
 runtime: org.kde.Platform
 runtime-version: '6.11'
 sdk: org.kde.Sdk
@@ -32,9 +32,9 @@ modules:
       - find /app/lib/sonicake-manager -type f -name '*.pyc' -delete
       - install -Dm755 packaging/flatpak/sonicake-manager /app/bin/sonicake-manager
       - install -Dm755 packaging/flatpak/sonicake-manager-gui /app/bin/sonicake-manager-gui
-      - install -Dm644 packaging/flatpak/io.github.diegobloise.sonicake_manager_linux.desktop /app/share/applications/io.github.diegobloise.sonicake_manager_linux.desktop
-      - install -Dm644 packaging/flatpak/io.github.diegobloise.sonicake_manager_linux.metainfo.xml /app/share/metainfo/io.github.diegobloise.sonicake_manager_linux.metainfo.xml
-      - install -Dm644 packaging/flatpak/io.github.diegobloise.sonicake_manager_linux.svg /app/share/icons/hicolor/scalable/apps/io.github.diegobloise.sonicake_manager_linux.svg
+      - install -Dm644 packaging/flatpak/io.github.diegobloise.sonicake-manager-linux.desktop /app/share/applications/io.github.diegobloise.sonicake-manager-linux.desktop
+      - install -Dm644 packaging/flatpak/io.github.diegobloise.sonicake-manager-linux.metainfo.xml /app/share/metainfo/io.github.diegobloise.sonicake-manager-linux.metainfo.xml
+      - install -Dm644 packaging/flatpak/io.github.diegobloise.sonicake-manager-linux.svg /app/share/icons/hicolor/scalable/apps/io.github.diegobloise.sonicake-manager-linux.svg
     sources:
       - type: dir
         path: ../..

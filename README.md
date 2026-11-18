@@ -87,11 +87,11 @@ A Flatpak manifest lives in [`packaging/flatpak/`](packaging/flatpak/) and uses 
 
 ```bash
 # flatpak-builder, if installed on the host:
-flatpak-builder --user --install --force-clean build-dir packaging/flatpak/io.github.diegobloise.sonicake_manager_linux.yml
+flatpak-builder --user --install --force-clean build-dir packaging/flatpak/io.github.diegobloise.sonicake-manager-linux.yml
 
 # or, on hosts without flatpak-builder (e.g. immutable systems):
 flatpak --user install flathub org.kde.Sdk//6.11 io.qt.PySide.BaseApp//6.11 org.flatpak.Builder//stable
-flatpak run org.flatpak.Builder --user --install --force-clean build-dir packaging/flatpak/io.github.diegobloise.sonicake_manager_linux.yml
+flatpak run org.flatpak.Builder --user --install --force-clean build-dir packaging/flatpak/io.github.diegobloise.sonicake-manager-linux.yml
 ```
 
 USB-MIDI needs `/dev/snd/seq`; Flatpak has no dedicated sound-only device permission, so the manifest uses `--device=all`. The app does not request host filesystem access. The manifest has been built and smoke-tested locally (CLI runs; GUI imports with `QT_QPA_PLATFORM=offscreen`); it has not yet been submitted to Flathub. Other formats (AppImage, RPM, DEB) are planned.

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>io.github.diegobloise.sonicake_manager_linux</id>
-  <launchable type="desktop-id">io.github.diegobloise.sonicake_manager_linux.desktop</launchable>
+  <id>io.github.diegobloise.sonicake-manager-linux</id>
+  <launchable type="desktop-id">io.github.diegobloise.sonicake-manager-linux.desktop</launchable>
   <name>Sonicake Manager</name>
   <summary>Manage Sonicake guitar processors on Linux</summary>
   <developer id="diegobloise.com">
