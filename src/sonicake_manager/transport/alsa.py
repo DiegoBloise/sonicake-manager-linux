@@ -53,6 +53,7 @@ class _Addr(ctypes.Structure):
 
 
 class _Ext(ctypes.Structure):
+    _layout_ = "ms"
     _pack_ = 1  # C struct snd_seq_ev_ext is packed: len(4) + ptr(8)
 
     _fields_ = [("len", ctypes.c_uint32), ("ptr", ctypes.c_void_p)]
@@ -68,6 +69,7 @@ class _Control(ctypes.Structure):
 
 
 class _QueueControl(ctypes.Structure):
+    _layout_ = "ms"
     _pack_ = 1
 
     _fields_ = [
