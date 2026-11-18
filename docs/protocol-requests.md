@@ -39,7 +39,7 @@ Medido contra o hardware (Pocket Master, novembro/2026):
 |---|---|
 | Escrita no edit buffer (parâmetro) | `12 45 01` ("preset-modified") ou `14 08 00` (ACK) — ambos indicam sucesso |
 | Seleção de preset | `12 45 00` ("preset-saved"), `12 45 01` ou `14 08 00` — todos indicam sucesso |
-| Save para slot de usuário | Não validado em hardware ainda |
+| Save para slot de usuário | `12 45 00` ("preset-saved") — validado em hardware (U46, novembro/2026) |
 
 A flag "modificado" é pegajosa (sticky): uma vez suja, ela só é limpa
 recarregando o preset (select) ou salvando. Restaurar os valores anteriores
