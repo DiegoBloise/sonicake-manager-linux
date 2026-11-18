@@ -22,7 +22,9 @@
       Features include browsing and selecting the 100 preset slots, editing
       the current preset (module on/off, effect selection, parameters, chain
       order, preset volume, amp mode), saving the edit buffer to user slots,
-      and editing supported global settings.
+      exporting and re-importing the current preset as JSON, whole-bank
+      backup export, user IR/clone slot name listing, and editing supported
+      global settings.
     </p>
     <p>
       This project is independent and is not affiliated with Sonicake.
@@ -37,7 +39,7 @@
   <releases>
     <release version="0.1.0" date="2026-11-18">
       <description>
-        <p>Initial release: current-preset editor, preset browser, global settings, CLI.</p>
+        <p>Initial release: current-preset editor, preset browser, global settings, JSON export/import, whole-bank backup export, IR/clone slot listing, CLI.</p>
       </description>
     </release>
   </releases>
