@@ -60,6 +60,18 @@ def nibble_collapse(data: bytes) -> bytes:
     return bytes(collapse_nibble(data[i], data[i + 1]) for i in range(0, len(data), 2))
 
 
+def _unwrap(data: bytes) -> bytes:
+    """Strip the optional ``8080`` prefix and the F0..F7 wrappers."""
+    body = data
+    if body.startswith(b"\x80\x80"):
+        body = body[2:]
+    if not body.startswith(b"\xF0"):
+        raise ValueError("missing F0 start byte")
+    if not body.endswith(b"\xF7"):
+        raise ValueError("missing F7 terminator")
+    return body[1:-1]
+
+
 def build_frame(payload: bytes, *, total: int = 1, seq: int = 0) -> bytes:
     """Build a full frame. CRC is over [tt, ss, len] + payload."""
     if len(payload) > MAX_PAYLOAD:
@@ -107,12 +119,12 @@ class Frame:
 
 
 def parse_frame(data: bytes) -> Frame:
-    """Parse a full frame. Raises ValueError on malformed data."""
-    if not data.startswith(b"\x80\x80\xF0"):
-        raise ValueError("missing 8080 F0 header")
-    if not data.endswith(b"\xF7"):
-        raise ValueError("missing F7 terminator")
-    body = data[3:-1]
+    """Parse a full frame. Raises ValueError on malformed data.
+
+    The ``8080`` prefix is a transport-level artifact and is accepted
+    optionally; responses from the device do not carry it.
+    """
+    body = _unwrap(data)
     if len(body) < 8 or len(body) % 2 != 0:
         raise ValueError("frame too short or odd-length body")
 

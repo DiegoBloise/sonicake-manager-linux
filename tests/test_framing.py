@@ -90,6 +90,16 @@ def test_frame_invalid_header():
         parse_frame(b"\x00\x00\xf0\x00\x00\x00\x00\x00\x00\x01\x01\x01\x02\xf7")
 
 
+def test_parse_response_without_8080_prefix():
+    # Responses from the device arrive as F0..F7 without the 8080 prefix.
+    raw = "F0030000010000000401020403030D0000F7"
+    parsed = parse_frame(bytes.fromhex(raw))
+    assert parsed.total == 1
+    assert parsed.seq == 0
+    assert parsed.len == 4
+    assert parsed.payload == bytes.fromhex("12433D00")
+
+
 def test_requests_constants_roundtrip():
     # Documented request constants: parse must succeed and re-encoding must
     # reproduce the exact documented bytes.
