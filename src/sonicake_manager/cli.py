@@ -7,6 +7,8 @@ Examples
     sonicake-manager info
     sonicake-manager names
     sonicake-manager state --json
+    sonicake-manager export preset.json
+    sonicake-manager import-preset preset.json --yes
     sonicake-manager select P03
     sonicake-manager set DRV 0 40
     sonicake-manager save 1 --name "MY TONE"
@@ -17,9 +19,12 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from pathlib import Path
 
 from .device import SonicakeDevice, DeviceError
+from .preset_file import apply_export, build_export, dumps_export, loads_export, preset_index_from_raw
 from .transport import AlsaSequencerTransport, TransportError, find_devices, list_devices
+from .validation import is_valid_name
 
 
 def _eprint(*args: object) -> None:
@@ -115,6 +120,60 @@ def cmd_globals(args) -> int:
     return 0
 
 
+def cmd_export(args) -> int:
+    with _open(args) as dev:
+        state = dev.state()
+        index = preset_index_from_raw(dev.preset_number_raw())
+        name = args.name
+        if name is None:
+            try:
+                names = dev.preset_names()
+            except DeviceError:
+                names = []
+            if index is not None and 0 <= index < len(names):
+                name = names[index]
+    data = build_export(state, slot_index=index, name=name)
+    text = dumps_export(data)
+    if args.output:
+        Path(args.output).write_text(text, encoding="utf-8")
+        slot = (data.get("slot") or {}).get("label") or "?"
+        print(f"exported {slot} to {args.output}")
+    else:
+        print(text, end="")
+    return 0
+
+
+def cmd_import_preset(args) -> int:
+    if not args.yes:
+        _eprint("refusing to write to the device without --yes")
+        return 2
+    try:
+        data = loads_export(Path(args.file).read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        _eprint(f"error: {exc}")
+        return 2
+    with _open(args) as dev:
+        report = apply_export(dev, data)
+        for line in report["applied"]:
+            print(f"ok: {line}")
+        for line in report["skipped"]:
+            print(f"skip: {line}")
+        if any(line.rstrip(")").endswith(("nack", "timeout", "preset-modified")) for line in report["applied"]):
+            print("warning: at least one device write was not ACKed")
+            return 1
+        if args.save_slot is not None:
+            name = args.name or (data.get("slot") or {}).get("name") or "PRESET"
+            name = name.upper()
+            if not is_valid_name(name):
+                _eprint(f"error: invalid preset name {name!r}")
+                return 2
+            ack = dev.save_preset(name, args.save_slot)
+            print(f"save '{name}' to slot {args.save_slot}: {ack}")
+            return 0 if ack == "ack" else 1
+    return 0
+
+
+
 def cmd_select(args) -> int:
     factory = args.name.upper().startswith("F")
     number = int(args.name[1:])
@@ -201,6 +260,18 @@ def _build_parser() -> argparse.ArgumentParser:
     sub.add_parser("state", help="decoded current-preset state (JSON)").set_defaults(func=cmd_state)
     sub.add_parser("names", help="list the 100 preset names").set_defaults(func=cmd_names)
     sub.add_parser("globals", help="decoded global settings (JSON)").set_defaults(func=cmd_globals)
+
+    p = sub.add_parser("export", help="export the current edit buffer as JSON (stdout if no file)")
+    p.add_argument("output", nargs="?", help="output file; prints to stdout when omitted")
+    p.add_argument("--name", help="name stored in the export (default: read from the device)")
+    p.set_defaults(func=cmd_export)
+
+    p = sub.add_parser("import-preset", help="replay an exported preset into the edit buffer (requires --yes)")
+    p.add_argument("file")
+    p.add_argument("--yes", action="store_true", help="confirm writes to the device")
+    p.add_argument("--save-slot", type=int, help="after importing, save the buffer to user slot 1..50")
+    p.add_argument("--name", help="name for --save-slot (default: name from the export)")
+    p.set_defaults(func=cmd_import_preset)
 
     p = sub.add_parser("select", help="select a preset, e.g. P03 or F12")
     p.add_argument("name", help="preset slot, e.g. P03 (user) or F12 (factory)")

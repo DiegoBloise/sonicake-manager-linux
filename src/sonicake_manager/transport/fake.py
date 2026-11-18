@@ -22,12 +22,15 @@ class FakeTransport:
                 time.sleep(delay)
 
     def recv(self, timeout: float = 0.0, idle_timeout: float = 0.0) -> list[bytes]:
-        responses, self._responses = self._responses, []
-        return responses
+        # One message per poll, like a real ALSA read; use request() for dumps.
+        if not self._responses:
+            return []
+        return [self._responses.pop(0)]
 
     def request(self, frame: bytes, timeout: float = 0.0, idle_timeout: float = 0.0) -> list[bytes]:
         self.send(frame)
-        return self.recv(timeout=timeout, idle_timeout=idle_timeout)
+        responses, self._responses = self._responses, []
+        return responses
 
     def close(self) -> None:
         pass

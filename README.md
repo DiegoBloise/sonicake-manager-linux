@@ -14,6 +14,7 @@ The goal is a fully native Linux experience for editing Sonicake processors: a P
 - State decode: volume, BPM, module on/off, selected effects, per-module parameters, signal chain, footswitch assignments
 - Edit the edit buffer: module on/off, effect selection, parameters, chain order, preset volume, amp mode, footswitch assignment
 - Save the buffer to any of the 50 user slots
+- Export the current edit buffer to JSON and replay it into the buffer (`export` / `import-preset --yes`)
 - PySide6 GUI (current-preset editor, preset browser, global settings) with English and Portuguese translations
 - CLI (`sonicake-manager`) for scripting and debugging
 - Packaged effect/parameter data tables; CRC-verified frames
@@ -21,7 +22,7 @@ The goal is a fully native Linux experience for editing Sonicake processors: a P
 ## Not yet implemented
 
 - IR upload and clone profile (NAM) management
-- Backup/restore and JSON import/export of presets
+- Full backup/restore of all 100 presets (current-preset JSON export/import is implemented)
 - BLE-MIDI transport (UI is prepared for it; ALSA sequencer only today)
 - Factory preset writing (read/select only)
 
@@ -73,7 +74,7 @@ USB-MIDI needs `/dev/snd/seq`; Flatpak has no dedicated sound-only device permis
 
 ## Protocol and data tables
 
-The wire format (uniform nibble expansion, CRC-8/SMBUS, BLE-style `8080` header) is documented in [docs/protocol.md](docs/protocol.md) and [docs/protocol-requests.md](docs/protocol-requests.md). The effect/parameter tables in `src/sonicake_manager/data/` are packaged JSON derived from the documented payload catalog.
+The wire format (uniform nibble expansion, CRC-8/SMBUS, BLE-style `8080` header) is documented in [docs/protocol.md](docs/protocol.md) and [docs/protocol-requests.md](docs/protocol-requests.md). Preset JSON export/import is described in [docs/preset-files.md](docs/preset-files.md). The effect/parameter tables in `src/sonicake_manager/data/` are packaged JSON derived from the documented payload catalog.
 
 ## License
 

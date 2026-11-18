@@ -43,6 +43,7 @@ src/sonicake_manager/
   decode.py            # decodificadores de dumps (estado, nomes, globais)
   writes.py            # builders de frames de escrita (tabelas + dinâmico)
   device.py            # API de alto nível (leitura de dumps, writes com ACK)
+  preset_file.py       # export/import JSON do buffer atual
   names.py             # encode/decode de nomes de preset
   i18n.py              # traduções EN/PT
   cli.py               # ponto de entrada CLI
