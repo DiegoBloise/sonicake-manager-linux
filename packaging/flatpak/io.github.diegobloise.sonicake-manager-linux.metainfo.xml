@@ -30,6 +30,12 @@
       This project is independent and is not affiliated with Sonicake.
     </p>
   </description>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/DiegoBloise/sonicake-manager-linux/main/docs/screenshots/main-window.png</image>
+      <caption>Current-preset editor showing module grid and signal chain controls</caption>
+    </screenshot>
+  </screenshots>
   <categories>
     <category>AudioVideo</category>
     <category>Audio</category>
