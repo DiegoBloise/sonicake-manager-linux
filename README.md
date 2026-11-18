@@ -1,6 +1,10 @@
 # Sonicake Manager for Linux
 
+[![tests](https://github.com/DiegoBloise/sonicake-manager-linux/actions/workflows/tests.yml/badge.svg)](https://github.com/DiegoBloise/sonicake-manager-linux/actions/workflows/tests.yml)
+
 Open-source desktop manager for [Sonicake](https://www.sonicake.com/) guitar processors — for Linux, built on a clean, documented implementation of the device's published SysEx payload format and public protocol notes. No firmware internals involved.
+
+Source: [github.com/DiegoBloise/sonicake-manager-linux](https://github.com/DiegoBloise/sonicake-manager-linux)
 
 The goal is a fully native Linux experience for editing Sonicake processors: a PySide6 GUI, a scriptable CLI, and a reusable Python protocol library.
 
@@ -42,10 +46,18 @@ See [docs/devices.md](docs/devices.md). Developed and verified against a **Pocke
 ## Install from source
 
 ```bash
+git clone https://github.com/DiegoBloise/sonicake-manager-linux.git
+cd sonicake-manager-linux
 python3 -m venv .venv
 .venv/bin/pip install .
 .venv/bin/sonicake-manager-gui    # desktop app
 .venv/bin/sonicake-manager --help # CLI
+```
+
+Or install directly into the current environment:
+
+```bash
+pip install git+https://github.com/DiegoBloise/sonicake-manager-linux.git
 ```
 
 The GUI starts disconnected; pick your device in the toolbar combo (auto-detected) or set `SONICAKE_MIDI_ADDRESS=24:0`.
@@ -74,7 +86,7 @@ sonicake-manager save 1 --name TONE   # save edit buffer to user slot 1
 A Flatpak manifest lives in [`packaging/flatpak/`](packaging/flatpak/) and uses the `io.qt.PySide.BaseApp` base (Qt 6.11 / KDE Platform), so build times stay small and no PySide6 sources are compiled. Build locally with:
 
 ```bash
-flatpak-builder --user --install --force-clean build-dir packaging/flatpak/io.github.fl4sh.sonicake_manager.yml
+flatpak-builder --user --install --force-clean build-dir packaging/flatpak/io.github.DiegoBloise.sonicake_manager_linux.yml
 ```
 
 USB-MIDI needs `/dev/snd/seq`; Flatpak has no dedicated sound-only device permission, so the manifest uses `--device=all`. The app does not request host filesystem access. This is experimental; expect to iterate on finish-args. Other formats (AppImage, RPM, DEB) are planned.

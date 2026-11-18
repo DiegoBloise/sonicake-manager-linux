@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>io.github.fl4sh.sonicake_manager</id>
-  <launchable type="desktop-id">io.github.fl4sh.sonicake_manager.desktop</launchable>
+  <id>io.github.DiegoBloise.sonicake_manager_linux</id>
+  <launchable type="desktop-id">io.github.DiegoBloise.sonicake_manager_linux.desktop</launchable>
   <name>Sonicake Manager</name>
   <summary>Manage Sonicake guitar processors on Linux</summary>
-  <developer id="io.github.fl4sh.sonicake_manager">
-    <name>Sonicake Manager for Linux contributors</name>
+  <developer id="diegobloise.com">
+    <name>Diego Bloise</name>
   </developer>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MIT</project_license>
-  <url type="homepage">https://github.com/fl4sh/sonicake-manager-linux</url>
-  <url type="bugtracker">https://github.com/fl4sh/sonicake-manager-linux/issues</url>
+  <url type="homepage">https://github.com/DiegoBloise/sonicake-manager-linux</url>
+  <url type="bugtracker">https://github.com/DiegoBloise/sonicake-manager-linux/issues</url>
   <description>
     <p>
       Sonicake Manager for Linux is an open-source desktop manager for

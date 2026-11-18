@@ -1,4 +1,4 @@
-id: io.github.fl4sh.sonicake_manager
+id: io.github.DiegoBloise.sonicake_manager_linux
 runtime: org.kde.Platform
 runtime-version: '6.11'
 sdk: org.kde.Sdk
@@ -29,9 +29,9 @@ modules:
       - find /app/lib/sonicake-manager -type f -name '*.pyc' -delete
       - install -Dm755 packaging/flatpak/sonicake-manager /app/bin/sonicake-manager
       - install -Dm755 packaging/flatpak/sonicake-manager-gui /app/bin/sonicake-manager-gui
-      - install -Dm644 packaging/flatpak/io.github.fl4sh.sonicake_manager.desktop /app/share/applications/io.github.fl4sh.sonicake_manager.desktop
-      - install -Dm644 packaging/flatpak/io.github.fl4sh.sonicake_manager.metainfo.xml /app/share/metainfo/io.github.fl4sh.sonicake_manager.metainfo.xml
-      - install -Dm644 packaging/flatpak/io.github.fl4sh.sonicake_manager.svg /app/share/icons/hicolor/scalable/apps/io.github.fl4sh.sonicake_manager.svg
+      - install -Dm644 packaging/flatpak/io.github.DiegoBloise.sonicake_manager_linux.desktop /app/share/applications/io.github.DiegoBloise.sonicake_manager_linux.desktop
+      - install -Dm644 packaging/flatpak/io.github.DiegoBloise.sonicake_manager_linux.metainfo.xml /app/share/metainfo/io.github.DiegoBloise.sonicake_manager_linux.metainfo.xml
+      - install -Dm644 packaging/flatpak/io.github.DiegoBloise.sonicake_manager_linux.svg /app/share/icons/hicolor/scalable/apps/io.github.DiegoBloise.sonicake_manager_linux.svg
     cleanup-commands:
       - /app/cleanup-BaseApp.sh
     sources:

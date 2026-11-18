@@ -9,7 +9,7 @@ description = "Open-source desktop manager for Sonicake guitar processors"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
-authors = [{ name = "Sonicake Manager for Linux contributors" }]
+authors = [{ name = "Diego Bloise" }]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: X11 Applications :: Qt",
@@ -30,6 +30,11 @@ dev = [
     "ruff>=0.5",
     "mypy>=1.10",
 ]
+
+[project.urls]
+Homepage = "https://github.com/DiegoBloise/sonicake-manager-linux"
+Repository = "https://github.com/DiegoBloise/sonicake-manager-linux"
+Issues = "https://github.com/DiegoBloise/sonicake-manager-linux/issues"
 
 [project.scripts]
 sonicake-manager = "sonicake_manager.cli:main"
