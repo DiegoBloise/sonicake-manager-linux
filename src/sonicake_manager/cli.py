@@ -120,6 +120,22 @@ def cmd_globals(args) -> int:
     return 0
 
 
+def cmd_ir_names(args) -> int:
+    with _open(args) as dev:
+        names = dev.ir_name_list()
+    for index, name in enumerate(names, start=1):
+        print(f"IR {index}  {name}")
+    return 0
+
+
+def cmd_clone_names(args) -> int:
+    with _open(args) as dev:
+        names = dev.clone_name_list()
+    for index, name in enumerate(names, start=1):
+        print(f"CLONE {index}  {name}")
+    return 0
+
+
 def cmd_export(args) -> int:
     with _open(args) as dev:
         state = dev.state()
@@ -260,6 +276,8 @@ def _build_parser() -> argparse.ArgumentParser:
     sub.add_parser("state", help="decoded current-preset state (JSON)").set_defaults(func=cmd_state)
     sub.add_parser("names", help="list the 100 preset names").set_defaults(func=cmd_names)
     sub.add_parser("globals", help="decoded global settings (JSON)").set_defaults(func=cmd_globals)
+    sub.add_parser("ir-names", help="list the 5 user IR slot names").set_defaults(func=cmd_ir_names)
+    sub.add_parser("clone-names", help="list the 5 user clone profile slot names").set_defaults(func=cmd_clone_names)
 
     p = sub.add_parser("export", help="export the current edit buffer as JSON (stdout if no file)")
     p.add_argument("output", nargs="?", help="output file; prints to stdout when omitted")

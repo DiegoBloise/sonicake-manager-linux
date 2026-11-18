@@ -52,6 +52,30 @@ def _bytes_of(hexstr: str) -> list[str]:
     return [hexstr[i : i + 2] for i in range(0, len(hexstr), 2)]
 
 
+def _decode_user_slot_names(payload: bytes, magic: bytes) -> list[str]:
+    """Decode the 5 user IR / user clone slot names (16-byte ASCII records)."""
+    if len(payload) < 7 + 5 * 16:
+        raise ValueError(f"dump too short for 5 slots: {len(payload)} bytes")
+    if payload[:2] != magic:
+        raise ValueError(f"unexpected magic {payload[:2].hex()} (expected {magic.hex()})")
+    names: list[str] = []
+    for slot in range(5):
+        start = 7 + slot * 16
+        block = payload[start : start + 16]
+        end = block.find(b"\x00")
+        raw = block if end < 0 else block[:end]
+        names.append(raw.decode("ascii", errors="replace"))
+    return names
+
+
+def decode_ir_names(payload: bytes) -> list[str]:
+    return _decode_user_slot_names(payload, bytes([0x12, 0x20]))
+
+
+def decode_clone_names(payload: bytes) -> list[str]:
+    return _decode_user_slot_names(payload, bytes([0x12, 0x24]))
+
+
 def decode_preset_names(payload: bytes) -> list[str]:
     """Decode the preset-names dump into 100 slot names (50 user + 50 factory)."""
     payload_hex = expand_hex(payload)

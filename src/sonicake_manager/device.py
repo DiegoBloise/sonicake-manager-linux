@@ -5,7 +5,9 @@ from __future__ import annotations
 from typing import Any
 
 from .decode import (
+    decode_clone_names,
     decode_globals,
+    decode_ir_names,
     decode_preset_names,
     decode_state,
     is_ack,
@@ -139,8 +141,14 @@ class SonicakeDevice:
         """Raw payload of the IR-names dump (layout documented in docs/)."""
         return self.request_payload("nomes_ir", timeout=4.0, idle_timeout=0.4)
 
+    def ir_name_list(self) -> list[str]:
+        return decode_ir_names(self.ir_names())
+
     def clone_names(self) -> bytes:
         return self.request_payload("nomes_clone", timeout=4.0, idle_timeout=0.4)
+
+    def clone_name_list(self) -> list[str]:
+        return decode_clone_names(self.clone_names())
 
     def close(self) -> None:
         close = getattr(self._transport, "close", None)

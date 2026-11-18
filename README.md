@@ -10,7 +10,7 @@ The goal is a fully native Linux experience for editing Sonicake processors: a P
 
 - USB-MIDI connection through the ALSA sequencer (ctypes over `libasound` — no compiled dependencies, works alongside PipeWire/JACK)
 - Device auto-discovery (Pocket Master and Q-series by name), or `SONICAKE_MIDI_ADDRESS=client:port`
-- Preset number, 100 preset names (50 user + 50 factory), current preset state, global settings
+- Preset number, 100 preset names (50 user + 50 factory), 5 user IR slot names, 5 user clone profile names, current preset state, global settings
 - State decode: volume, BPM, module on/off, selected effects, per-module parameters, signal chain, footswitch assignments
 - Edit the edit buffer: module on/off, effect selection, parameters, chain order, preset volume, amp mode, footswitch assignment
 - Save the buffer to any of the 50 user slots
