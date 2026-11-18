@@ -19,6 +19,7 @@ from .common import preset_label
 from .editor_tab import EditorTab
 from .globals_tab import GlobalsTab
 from .presets_tab import PresetsTab
+from .slots_tab import SlotsTab
 
 
 class MainWindow(QMainWindow):
@@ -58,11 +59,13 @@ class MainWindow(QMainWindow):
         self.tabs = QTabWidget()
         self.editor = EditorTab()
         self.presets = PresetsTab()
+        self.slots = SlotsTab()
         self.globals_tab = GlobalsTab()
         self.about = AboutTab()
 
         self.tabs.addTab(self.editor, t("tab_editor"))
         self.tabs.addTab(self.presets, t("tab_presets"))
+        self.tabs.addTab(self.slots, t("tab_slots"))
         self.tabs.addTab(self.globals_tab, t("tab_globals"))
         self.tabs.addTab(self.about, t("tab_about"))
         self.setCentralWidget(self.tabs)
@@ -83,6 +86,7 @@ class MainWindow(QMainWindow):
         self.presets.select_requested.connect(self._on_select_preset)
         self.presets.save_requested.connect(self._on_save_preset)
         self.presets.refresh_requested.connect(self._on_refresh_names)
+        self.slots.refresh_requested.connect(self._on_refresh_slots)
 
         self.globals_tab.apply_requested.connect(self._on_globals_apply)
         self.globals_tab.refresh_requested.connect(self._on_refresh_globals)
@@ -153,6 +157,7 @@ class MainWindow(QMainWindow):
         self.export_action.setEnabled(True)
         self.editor.setEnabled(True)
         self.presets.setEnabled(True)
+        self.slots.setEnabled(True)
         self.globals_tab.setEnabled(True)
 
     def _disconnect(self) -> None:
@@ -164,6 +169,7 @@ class MainWindow(QMainWindow):
             self.export_action.setEnabled(False)
             self.editor.setEnabled(False)
             self.presets.setEnabled(False)
+            self.slots.setEnabled(False)
             self.globals_tab.setEnabled(False)
             self.connect_action.setText(t("action_connect"))
             self._set_status(t("status_disconnected"))
@@ -185,6 +191,7 @@ class MainWindow(QMainWindow):
         self.editor.load_state(state, preset_label(index) if index is not None else None)
         names = self.dev.preset_names()
         self.presets.set_names(names, index)
+        self.slots.load(self.dev.ir_name_list(), self.dev.clone_name_list())
         glob = self.dev.globals()
         self.globals_tab.load_globals(glob)
         self._set_status(t("status_connected", name=self.port_combo.currentText()))
@@ -196,6 +203,15 @@ class MainWindow(QMainWindow):
         with self._busy(t("status_reading")):
             names = dev.preset_names()
         self.presets.set_names(names, self.current_index)
+
+    def _on_refresh_slots(self) -> None:
+        dev = self._require_device()
+        if dev is None:
+            return
+        with self._busy(t("status_reading")):
+            ir_names = dev.ir_name_list()
+            clone_names = dev.clone_name_list()
+        self.slots.load(ir_names, clone_names)
 
     def _on_refresh_globals(self) -> None:
         dev = self._require_device()
