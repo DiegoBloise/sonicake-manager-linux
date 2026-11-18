@@ -7,7 +7,7 @@ from pathlib import Path
 
 from PySide6.QtCore import QSettings, QTimer
 from PySide6.QtGui import QAction
-from PySide6.QtWidgets import QApplication, QComboBox, QFileDialog, QMainWindow, QMessageBox, QStatusBar, QTabWidget, QToolBar
+from PySide6.QtWidgets import QApplication, QComboBox, QFileDialog, QLabel, QMainWindow, QMessageBox, QStatusBar, QTabWidget, QToolBar
 
 from .. import __version__
 from ..device import SonicakeDevice, DeviceError
@@ -72,6 +72,8 @@ class MainWindow(QMainWindow):
 
         self.status = QStatusBar()
         self.setStatusBar(self.status)
+        self.unsaved_label = QLabel("")
+        self.status.addPermanentWidget(self.unsaved_label)
         self._set_status(t("status_disconnected"))
 
         # -- wiring --------------------------------------------------------------
@@ -97,6 +99,17 @@ class MainWindow(QMainWindow):
 
     def _set_status(self, text: str) -> None:
         self.status.showMessage(text)
+
+    def _set_unsaved(self, unsaved: bool) -> None:
+        self.unsaved_label.setText(t("status_unsaved") if unsaved else "")
+
+    def _sync_unsaved(self) -> None:
+        if self.dev is None:
+            return
+        try:
+            self._set_unsaved(self.dev.preset_modified())
+        except DeviceError:
+            pass
 
     def _busy(self, text: str):
         from .common import busy_cursor
@@ -172,6 +185,7 @@ class MainWindow(QMainWindow):
             self.slots.setEnabled(False)
             self.globals_tab.setEnabled(False)
             self.connect_action.setText(t("action_connect"))
+            self._set_unsaved(False)
             self._set_status(t("status_disconnected"))
 
     def closeEvent(self, event) -> None:  # noqa: N802 (Qt API)
@@ -194,6 +208,7 @@ class MainWindow(QMainWindow):
         self.slots.load(self.dev.ir_name_list(), self.dev.clone_name_list())
         glob = self.dev.globals()
         self.globals_tab.load_globals(glob)
+        self._sync_unsaved()
         self._set_status(t("status_connected", name=self.port_combo.currentText()))
 
     def _on_refresh_names(self) -> None:
@@ -253,6 +268,7 @@ class MainWindow(QMainWindow):
             return
         with self._busy(t("status_writing")):
             self._ack(dev.set_module_state(module, on))
+        self._set_unsaved(True)
 
     def _on_effect_changed(self, module: str, effect_id: int) -> None:
         dev = self._require_device()
@@ -260,6 +276,7 @@ class MainWindow(QMainWindow):
             return
         with self._busy(t("status_writing")):
             self._ack(dev.set_effect_type(module, effect_id))
+        self._set_unsaved(True)
         QTimer.singleShot(250, self._reload_state_after_effect)
 
     def _reload_state_after_effect(self) -> None:
@@ -283,6 +300,7 @@ class MainWindow(QMainWindow):
             return
         with self._busy(t("status_writing")):
             self._ack(dev.set_parameter(module, alg_id, value))
+        self._set_unsaved(True)
 
     def _on_volume_changed(self, value: int) -> None:
         dev = self._require_device()
@@ -290,6 +308,7 @@ class MainWindow(QMainWindow):
             return
         with self._busy(t("status_writing")):
             self._ack(dev.set_preset_volume(value))
+        self._set_unsaved(True)
 
     def _on_bpm_changed(self, value: int) -> None:
         dev = self._require_device()
@@ -297,6 +316,7 @@ class MainWindow(QMainWindow):
             return
         with self._busy(t("status_writing")):
             self._ack(dev.set_bpm(value))
+        self._set_unsaved(True)
 
     def _on_amp_mode_changed(self, clone: bool) -> None:
         dev = self._require_device()
@@ -304,6 +324,7 @@ class MainWindow(QMainWindow):
             return
         with self._busy(t("status_writing")):
             self._ack(dev.set_amp_mode(clone))
+        self._set_unsaved(True)
 
     # -- presets -----------------------------------------------------------------
 
@@ -328,6 +349,7 @@ class MainWindow(QMainWindow):
         self.current_index = index
         self.editor.load_state(state, preset_label(index))
         self.presets.set_current(index)
+        self._sync_unsaved()
 
     def _on_save_from_editor(self) -> None:
         self.tabs.setCurrentIndex(1)  # presets tab
@@ -341,6 +363,7 @@ class MainWindow(QMainWindow):
         self._ack(ack)
         if ack == "ack":
             self._set_status(t("presets_saved", name=name, slot=slot))
+        self._sync_unsaved()
 
     # -- globals -------------------------------------------------------------------
 
